@@ -10,7 +10,6 @@ import csv
 import numpy as np
 import tools
 import time
-import threading
 
 
 ESCAPE = 27
@@ -49,7 +48,7 @@ beta = 1.7
 gamma = np.pi/3
 record_size = 20
 empty_treshold = 0.02
-
+limit_angle = np.pi/8
 
 
 # get video capture
@@ -83,11 +82,14 @@ record_caract2 = [0]*record_size
 record_pred = [0]*record_size
 start_rec = time.perf_counter()
 
+nb_wave = 0
+last_theta = 0
+theta=0
 
 # main loop
 while True :
-    print(f"last loop : {1000*(time.perf_counter()-start_rec)}")
-    print('')
+    #print(f"last loop : {1000*(time.perf_counter()-start_rec)}")
+    #print('')
     start_rec = time.perf_counter()
     
     
@@ -146,40 +148,45 @@ while True :
     
     
     
-    answer = "None"
+    answer = "none"
     Ljudge=0
     blocks = []
     try :
         ts = time.perf_counter()
         # get the center and the main axis of the image
+        if theta is not None : last_theta = theta
         center, theta = tools.getCenterAndAngle(binar, empty_treshold)
         te = time.perf_counter()
         record_caract.append(te-ts)
         record_caract.pop(0)
         
         if center is not None :
-            ts = time.perf_counter()
-            # max and min angles for Ltip and Lmin detection
-            amin = theta-alpha
-            amax = theta+alpha
-            Ltip, Lmin = tools.findTipMin(binar, center, amin, amax)
-            te = time.perf_counter()
-            record_caract2.append(te-ts)
-            record_caract2.pop(0)
-            
-            blocks = []
-            ts = time.perf_counter()
-            if Ltip/Lmin<beta :
-                answer = 'rock'
-            else :
-                Ljudge = (Ltip+Lmin)/2
-                blocks = tools.nbBlock(binar, Ljudge, np.pi+theta+gamma, 3*np.pi+theta-gamma, center)
-                nb_blocks = len(blocks)
-                answer = 'scissors' if nb_blocks<=2 else 'paper'
-                
-            te = time.perf_counter()
-            record_pred.append(te-ts)
-            record_pred.pop(0)    
+            if last_theta<-limit_angle and theta>-limit_angle :
+                nb_wave += 1
+                if nb_wave==3 :
+                    nb_wave = 0
+                    ts = time.perf_counter()
+                    # max and min angles for Ltip and Lmin detection
+                    amin = theta-alpha
+                    amax = theta+alpha
+                    Ltip, Lmin = tools.findTipMin(binar, center, amin, amax)
+                    te = time.perf_counter()
+                    record_caract2.append(te-ts)
+                    record_caract2.pop(0)
+                    
+                    blocks = []
+                    ts = time.perf_counter()
+                    if Ltip/Lmin<beta :
+                        answer = 'rock'
+                    else :
+                        Ljudge = (Ltip+Lmin)/2
+                        blocks = tools.nbBlock(binar, Ljudge, np.pi+theta+gamma, 3*np.pi+theta-gamma, center)
+                        nb_blocks = len(blocks)
+                        answer = 'scissors' if nb_blocks<=2 else 'paper'
+                        
+                    te = time.perf_counter()
+                    record_pred.append(te-ts)
+                    record_pred.pop(0)    
             
         else :
             record_caract2.append(0)
@@ -193,10 +200,11 @@ while True :
     
     
     # show prediction
-    print(answer)
+    if answer!='none':
+        print(answer)
     
     tot_time = time.perf_counter()-start_rec
-    print(f"total time : {1000*tot_time}")
+    #print(f"total time : {1000*tot_time}")
     
 
     
@@ -213,7 +221,7 @@ while True :
     
     cv2.imshow("Notes", notes)
     
-    
+    """
     # print performance
     print(f"get image : {1000*sum(record_read)/record_size}")
     print(f"pretreat : {1000*sum(record_pretreat)/record_size}")
@@ -222,7 +230,7 @@ while True :
     print(f"center, angle : {1000*sum(record_caract)/record_size}")
     print(f"Ltip, Lmin : {1000*sum(record_caract2)/record_size}")
     print(f"prediction : {1000*sum(record_pred)/record_size}")
-    
+    """
     
     
     # input gestion
