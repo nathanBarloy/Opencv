@@ -1,6 +1,6 @@
 property;value
 fps;100
-gain;0
-gamma;30
+gain;10
+gamma;20
 exposure;-7
-brightness;0
+brightness;10
