@@ -41,8 +41,8 @@ with open("properties.csv", 'r') as file :
     for row in reader :
         properties[row[0]] = int(row[1])
 
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 768)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1024)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 for k in settings.keys() :
     cap.set(settings[k][0], properties[k])
 

@@ -56,8 +56,8 @@ empty_treshold = 0.02
 cap = cv2.VideoCapture(0)
 
 # setup of the camera
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT,768)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH,1024)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH,640)
 with open("properties.csv", 'r') as file :
     reader = csv.reader(file, delimiter=';')
     reader.__next__()
