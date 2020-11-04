@@ -22,7 +22,7 @@ settings = {"fps":cv2.CAP_PROP_FPS,
 
 
 # hyperparameters
-threshold_value = 15
+threshold_value = 25
 kernel_size = 7
 blur_size = 5
 kernel = np.array([[0,0,0,1,0,0,0],
@@ -49,14 +49,16 @@ gamma = np.pi/3
 record_size = 20
 empty_treshold = 0.02
 limit_angle = np.pi/8
+reset_time = 3
+noise_time = 0.2
 
 
 # get video capture
 cap = cv2.VideoCapture(0)
 
 # setup of the camera
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT,768)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH,1024)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH,640)
 with open("properties.csv", 'r') as file :
     reader = csv.reader(file, delimiter=';')
     reader.__next__()
@@ -83,6 +85,7 @@ record_pred = [0]*record_size
 start_rec = time.perf_counter()
 
 nb_wave = 0
+last_wave_time = 0
 last_theta = 0
 theta=0
 
@@ -91,6 +94,9 @@ while True :
     #print(f"last loop : {1000*(time.perf_counter()-start_rec)}")
     #print('')
     start_rec = time.perf_counter()
+    
+    if start_rec-last_wave_time>reset_time :
+        nb_wave = 0
     
     
     # read capture
@@ -161,8 +167,10 @@ while True :
         record_caract.pop(0)
         
         if center is not None :
-            if last_theta<-limit_angle and theta>-limit_angle :
+            if last_theta<-limit_angle and theta>-limit_angle and time.perf_counter()-last_wave_time>noise_time :
                 nb_wave += 1
+                last_wave_time = time.perf_counter()
+                print(nb_wave)
                 if nb_wave==3 :
                     nb_wave = 0
                     ts = time.perf_counter()
