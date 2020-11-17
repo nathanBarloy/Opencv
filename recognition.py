@@ -27,7 +27,7 @@ settings = {"fps":cv2.CAP_PROP_FPS,
 answer_dict = {"none":'1', "scissors":'4', "paper":'3', "rock":'2'}
 
 # hyperparameters
-threshold_value = 15
+threshold_value = 220
 kernel_size = 7
 blur_size = 5
 kernel = np.array([[0,0,0,1,0,0,0],
@@ -69,14 +69,6 @@ with open("properties.csv", 'r') as file :
         cap.set(settings[row[0]], int(row[1]))
 
 
-
-# get background image
-ret, background = cap.read(cv2.CV_8UC1)
-for _ in range(15) :
-    ret, background = cap.read(cv2.CV_8UC1)
-background = background[:,:,0]
-background = cv2.medianBlur(background, blur_size)
-
 # records initialization
 record_read = [0]*record_size
 record_pretreat = [0]*record_size
@@ -116,7 +108,6 @@ while True :
     # image preprocessing
     ts = time.perf_counter()
     img = cv2.medianBlur(img, blur_size)
-    img = cv2.absdiff(img, background)
     #cv2.imshow("Backgroud substaction", img)
     
     te = time.perf_counter()
@@ -127,7 +118,7 @@ while True :
     
     # binarize image
     ts = time.perf_counter()
-    ret, binar = cv2.threshold(img, threshold_value, 255, cv2.THRESH_BINARY)
+    ret, binar = cv2.threshold(img, threshold_value, 255, cv2.THRESH_BINARY_INV)
     
     te = time.perf_counter()
     record_binar.append(te-ts)
