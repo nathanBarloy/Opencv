@@ -10,10 +10,12 @@ import csv
 import numpy as np
 import tools
 import time
-import threading
+import serial
 
 
 ESCAPE = 27
+
+bot = serial.Serial('COM3', 9600)
 
 settings = {"fps":cv2.CAP_PROP_FPS,
             "exposure":cv2.CAP_PROP_EXPOSURE,
@@ -21,6 +23,8 @@ settings = {"fps":cv2.CAP_PROP_FPS,
             "gain":cv2.CAP_PROP_GAIN,
             "gamma":cv2.CAP_PROP_GAMMA}
 
+
+answer_dict = {"none":'1', "scissors":'4', "paper":'3', "rock":'2'}
 
 # hyperparameters
 threshold_value = 15
@@ -83,11 +87,12 @@ record_caract2 = [0]*record_size
 record_pred = [0]*record_size
 start_rec = time.perf_counter()
 
+last_answer = "none"
 
 # main loop
 while True :
-    print(f"last loop : {1000*(time.perf_counter()-start_rec)}")
-    print('')
+    #print(f"last loop : {1000*(time.perf_counter()-start_rec)}")
+    #print('')
     start_rec = time.perf_counter()
     
     
@@ -146,7 +151,7 @@ while True :
     
     
     
-    answer = "None"
+    answer = "none"
     Ljudge=0
     blocks = []
     try :
@@ -193,10 +198,13 @@ while True :
     
     
     # show prediction
-    print(answer)
+    #print(answer)
+    if last_answer!=answer :
+        bot.write(answer_dict[answer].encode())
+        last_answer = answer
     
     tot_time = time.perf_counter()-start_rec
-    print(f"total time : {1000*tot_time}")
+    #print(f"total time : {1000*tot_time}")
     
 
     
@@ -213,7 +221,7 @@ while True :
     
     cv2.imshow("Notes", notes)
     
-    
+    """
     # print performance
     print(f"get image : {1000*sum(record_read)/record_size}")
     print(f"pretreat : {1000*sum(record_pretreat)/record_size}")
@@ -222,7 +230,7 @@ while True :
     print(f"center, angle : {1000*sum(record_caract)/record_size}")
     print(f"Ltip, Lmin : {1000*sum(record_caract2)/record_size}")
     print(f"prediction : {1000*sum(record_pred)/record_size}")
-    
+    """
     
     
     # input gestion
