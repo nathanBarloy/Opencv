@@ -4,31 +4,34 @@ Created on Fri Oct  9 10:14:21 2020
 
 @author: nathan barloy
 """
+import time
 
 import cv2
 import csv
 import numpy as np
-import tools
-import time
 import serial
+
+import tools
 
 
 ESCAPE = 27
 
+# Get the communication with the robot
+# Warning ! Change 'COM3' according to where the bot is connected on the computer
+# (you can find this in the device manager of the computer)
 bot = serial.Serial('COM3', 9600)
 
+# dictionnary for the settings of the camera
 settings = {"fps":cv2.CAP_PROP_FPS,
             "exposure":cv2.CAP_PROP_EXPOSURE,
             "brightness":cv2.CAP_PROP_BRIGHTNESS,
             "gain":cv2.CAP_PROP_GAIN,
             "gamma":cv2.CAP_PROP_GAMMA}
 
-
 answer_dict = {"none":'1', "scissors":'4', "paper":'3', "rock":'2'}
 
 # hyperparameters
 threshold_value = 220
-kernel_size = 7
 blur_size = 5
 kernel = np.array([[0,0,0,1,0,0,0],
                    [0,0,1,1,1,0,0],
@@ -37,16 +40,7 @@ kernel = np.array([[0,0,0,1,0,0,0],
                    [0,1,1,1,1,1,0],
                    [0,0,1,1,1,0,0],
                    [0,0,0,1,0,0,0]], np.uint8)
-"""
-kernerl = np.array([[0,0,0,1,1,1,0,0,0],
-                    [0,0,1,1,1,1,1,0,0],
-                    [0,1,1,1,1,1,1,1,0],
-                    [1,1,1,1,1,1,1,1,1],
-                    [1,1,1,1,1,1,1,1,1],
-                    [1,1,1,1,1,1,1,1,1],
-                    [0,1,1,1,1,1,1,1,0],
-                    [0,0,1,1,1,1,1,0,0],
-                    [0,0,0,1,1,1,0,0,0]], np.uint8)"""
+
 
 alpha = np.pi/7
 beta = 1.7
@@ -69,6 +63,7 @@ with open("properties.csv", 'r') as file :
         cap.set(settings[row[0]], int(row[1]))
 
 
+
 # records initialization
 record_read = [0]*record_size
 record_pretreat = [0]*record_size
@@ -79,12 +74,18 @@ record_caract2 = [0]*record_size
 record_pred = [0]*record_size
 start_rec = time.perf_counter()
 
+
+
+
+
+
+
 last_answer = "none"
 
 # main loop
 while True :
-    #print(f"last loop : {1000*(time.perf_counter()-start_rec)}")
-    #print('')
+    print(f"last loop : {1000*(time.perf_counter()-start_rec)}")
+    print('')
     start_rec = time.perf_counter()
     
     
@@ -101,19 +102,13 @@ while True :
     record_read.pop(0)
     
     
-    # show image
-    #cv2.imshow("Camera Image", img)
-    
-    
     # image preprocessing
     ts = time.perf_counter()
     img = cv2.medianBlur(img, blur_size)
-    #cv2.imshow("Backgroud substaction", img)
     
     te = time.perf_counter()
     record_pretreat.append(te-ts)
     record_pretreat.pop(0)
-    
     
     
     # binarize image
@@ -128,17 +123,10 @@ while True :
     # morphological transformation
     ts = time.perf_counter()
     binar = cv2.morphologyEx(binar, cv2.MORPH_CLOSE, kernel)
-    """
-    binar = cv2.morphologyEx(binar, cv2.MORPH_OPEN, kernel)
-    """
     
     te = time.perf_counter()
     record_morph.append(te-ts)
     record_morph.pop(0)
-    
-    
-    # show binary image
-    #cv2.imshow("Binarized Image", binar)
     
     
     
@@ -212,7 +200,7 @@ while True :
     
     cv2.imshow("Notes", notes)
     
-    """
+    
     # print performance
     print(f"get image : {1000*sum(record_read)/record_size}")
     print(f"pretreat : {1000*sum(record_pretreat)/record_size}")
@@ -221,7 +209,7 @@ while True :
     print(f"center, angle : {1000*sum(record_caract)/record_size}")
     print(f"Ltip, Lmin : {1000*sum(record_caract2)/record_size}")
     print(f"prediction : {1000*sum(record_pred)/record_size}")
-    """
+    
     
     
     # input gestion
