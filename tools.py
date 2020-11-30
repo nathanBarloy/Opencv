@@ -9,7 +9,6 @@ from typing import List, Tuple
 import math
 
 import numpy as np
-import cv2
 
 
 def generate_arc(R:float, amin:float, amax:float) -> List[Tuple[int,int]] :
