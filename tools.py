@@ -7,6 +7,7 @@ Created on Fri Oct  9 11:39:34 2020
 
 from typing import List, Tuple
 import math
+
 import numpy as np
 import cv2
 
@@ -47,7 +48,8 @@ def generate_arc(R:float, amin:float, amax:float) -> List[Tuple[int,int]] :
 
 def getCenterAndAngle(src:np.ndarray, empty_threshold:float) -> Tuple[Tuple[int,int], float] :
     """
-    Get the center and the angle of the main axis of a binary image. None if the image is considered empty.
+    Get the center and the angle of the main axis of a binary image.
+    None if the image is considered empty.
 
     Parameters
     ----------
@@ -82,8 +84,8 @@ def getCenterAndAngle(src:np.ndarray, empty_threshold:float) -> Tuple[Tuple[int,
 
 def isBlack(src:np.ndarray, R:float, amin:float, amax:float, center:Tuple[int,int]) -> bool :
     """
-    Check wether the pixels on the circular arc defined by the center 'center', the radius 'R' and 
-    the angles 'amin' and 'amax' are all black.
+    Check wether the pixels on the circular arc defined by the center 'center',
+    the radius 'R' and the angles 'amin' and 'amax' are all black.
 
     Parameters
     ----------
@@ -162,7 +164,8 @@ def isWhite(src:np.ndarray, R:float, amin:float, amax:float, center:Tuple[int,in
 
 
 
-def nbBlock(src:np.ndarray, R:float, amin:float, amax:float, center:Tuple[int,int]) -> List[Tuple[int,int]] :
+def nbBlock(src:np.ndarray, R:float, amin:float, amax:float, center:Tuple[int,int]) \
+            -> List[Tuple[int,int]] :
     """
     get the first pixel of the white blocks on the circular arc defined by the center 'center',
     the radius 'R' and the angles 'amin' and 'amax'.
@@ -202,13 +205,14 @@ def nbBlock(src:np.ndarray, R:float, amin:float, amax:float, center:Tuple[int,in
 
 
 
-def findTipMin(src:np.ndarray, center:Tuple[int,int], amin:float, amax:float) -> Tuple[float, float] :
+def findTipMin(src:np.ndarray, center:Tuple[int,int], amin:float, amax:float) \
+                -> Tuple[float, float] :
     """
     Find two things :
-        - The distance between the center of the object, and the tip of the fingers, only checking between
-            'amin' and 'amax'.
-        - The distance between the center of the object, and the base of the fingers, only checking between
-            'amin' and 'amax'.
+        - The distance between the center of the object, and the tip of the fingers,
+            only checking between 'amin' and 'amax'.
+        - The distance between the center of the object, and the base of the fingers,
+            only checking between 'amin' and 'amax'.
 
     Parameters
     ----------
@@ -352,54 +356,4 @@ def generate_arc2(R:float, amin:float, amax:float) -> List[Tuple[int,int]] :
         return circle[int(n*pmin):int(n*pmax)]
     else :
         return circle[int(n*pmin):]+circle[:int(n*pmax)]
-    
-    
-
-def show_results(gray:np.array, center:Tuple[int,int], amin:float, amax:float, Ltip:float, Lmin:float, Ljudge:float, blocks:List[Tuple[int,int]], answer:str, theta:float, gamma:float) -> None :
-    """
-    Show the results of the analysis.
-
-    Parameters
-    ----------
-    gray : np.array
-        The grayscale image.
-    center : Tuple[int,int]
-        The pixel that is the center of the image
-    amin : float
-        Start angle for the arc.
-    amax : float
-        End angle for the arc.
-    Ltip : float
-        Distance from the tip of the fingers.
-    Lmin : float
-        Distance from the base of the fingers.
-    Ljudge : float
-        Radius of the judge line.
-    blocks : List[Tuple[int,int]]
-        The list of the start pixel of the different blocks on the judge line.
-    answer : str
-        The result of the analysis.
-    theta : float
-        Theta hyperparameter.
-    gamma : float
-        Gamma hyperparameter.
-
-    Returns
-    -------
-    None 
-
-    """
-    notes = cv2.cvtColor(gray,cv2.COLOR_GRAY2BGR)
-    if answer!='none' and center is not None :
-        cv2.line(notes, (center[0]-15,center[1]), (center[0]+15, center[1]), (0,0,255), 2)
-        cv2.line(notes, (center[0],center[1]-15), (center[0], center[1]+15), (0,0,255), 2)
-        cv2.ellipse(notes, center, (int(Ltip),int(Ltip)), 0, amin*180/np.pi, amax*180/np.pi, (255,0,0), 3)
-        cv2.ellipse(notes, center, (int(Lmin),int(Lmin)), 0, amin*180/np.pi, amax*180/np.pi, (0,255,0), 3)
-        if answer!='rock' :
-            cv2.ellipse(notes, center, (int(Ljudge),int(Ljudge)), 180+theta*180/np.pi, gamma*180/np.pi, 360-gamma*180/np.pi, (0,255,255), 3)
-            for b in blocks :
-                cv2.circle(notes, b, 10, (255,255,0), -1)
-    
-    cv2.imshow("Notes", notes)
-    
-        
+      
